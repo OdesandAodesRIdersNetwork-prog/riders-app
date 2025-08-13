@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'riders-cache-v2';
+const CACHE_NAME = 'riders-cache-v3';
 const ASSETS = [
   '/index.html',
   '/article.html',
