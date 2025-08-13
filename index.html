@@ -1,0 +1,30 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <title>Riders Network — Search</title>
+</head>
+<body>
+  <header class="header">
+    <h1>Riders Network</h1>
+    <nav class="nav">
+      <a class="active" href="index.html">Search</a>
+      <a href="map.html">Map</a>
+    </nav>
+  </header>
+  <div class="container">
+    <div class="card">
+      <input id="q" class="input" placeholder="Search tech tips (try: regulator, cooling, CVT)" oninput="RN.renderSearch()"/>
+    </div>
+    <div id="results"></div>
+  </div>
+  <div class="footer small">Add to Home Screen to install. Works offline for saved pages.</div>
+  <script src="/assets/js/lunr.min.js"></script>
+  <script src="/assets/js/app.js"></script>
+  <script>RN.renderSearch()</script>
+</body>
+</html>

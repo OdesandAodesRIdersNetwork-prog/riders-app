@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "title": "Regulator Grounding Fix (ODES 800)",
+    "tags": [
+      "Electrical",
+      "Charging",
+      "Dominator 800"
+    ],
+    "path": "content/tech/regulator_grounding_fix.md"
+  },
+  {
+    "id": 2,
+    "title": "Cooling System Checks (ODES 800)",
+    "tags": [
+      "Cooling",
+      "Overheating",
+      "Dominator 800"
+    ],
+    "path": "content/tech/cooling_system_checks.md"
+  },
+  {
+    "id": 3,
+    "title": "CVT Belt Break-in",
+    "tags": [
+      "CVT",
+      "Belt",
+      "Maintenance"
+    ],
+    "path": "content/tech/cvt_belt_breakin.md"
+  }
+]
