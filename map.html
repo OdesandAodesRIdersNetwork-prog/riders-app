@@ -1,16 +1,24 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <title>Odes & Aodes Riders Network — Map</title>
   <meta charset="utf-8">
+  <title>Odes & Aodes Riders Network — Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- PWA + icons (keep these paths as-is) -->
   <link rel="manifest" href="/manifest.v3.webmanifest">
-  <link rel="stylesheet" href="/assets/css/style.css">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32-v3.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16-v3.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/favicon-180-v3.png">
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <!-- App styles -->
+  <link rel="stylesheet" href="/assets/css/style.css">
+
+  <!-- Leaflet (map library) -->
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
 </head>
 <body>
   <header class="header">
@@ -20,22 +28,151 @@
       <a class="active" href="map.html">Map</a>
     </nav>
   </header>
+
   <div class="container">
     <div class="card">
-      <p class="small">This starter uses online tiles (OpenStreetMap). Offline Ontario tiles can be added later.</p>
+      <p class="small">
+        Online tiles (OpenStreetMap). You can import a <code>.gpx</code> track below.
+        GPS works offline; tiles do not unless we add offline maps later.
+      </p>
+
       <div id="map" class="leaflet-container" style="height:70vh"></div>
-      <div style="margin-top:12px">
+
+      <!-- GPX loader -->
+      <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center">
         <input type="file" id="gpxfile" accept=".gpx" />
         <button class="button" id="loadBtn">Load GPX</button>
+
+        <!-- Preloaded GPX (optional): add your own files in /gpx/ and add more buttons -->
+        <!--
+        <button class="button" onclick="loadPreloadedGPX('/gpx/ontario_trail.gpx')">Ontario Trail</button>
+        -->
+      </div>
+
+      <!-- GPS controls -->
+      <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="button" id="locateBtn">📍 Locate me</button>
+        <button class="button" id="trackBtn">▶️ Start tracking</button>
       </div>
     </div>
   </div>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+
   <script>
+    // Base map
     const map = L.map('map').setView([45.4215, -75.6972], 7);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
-    function parseGPX(text) { const xml = new DOMParser().parseFromString(text,'application/xml'); return Array.from(xml.getElementsByTagName('trkpt')).map(el=>[parseFloat(el.getAttribute('lat')), parseFloat(el.getAttribute('lon'))]); }
-    document.getElementById('loadBtn').addEventListener('click', ()=>{ const f=document.getElementById('gpxfile').files[0]; if(!f) return alert('Choose a GPX file first.'); const r=new FileReader(); r.onload=()=>{ const pts=parseGPX(r.result); if(!pts.length) return alert('No track points found'); const poly=L.polyline(pts,{weight:3}).addTo(map); map.fitBounds(poly.getBounds()); }; r.readAsText(f); });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // --- GPX support ---
+    function parseGPX(text) {
+      const xml = new DOMParser().parseFromString(text, 'application/xml');
+      return Array.from(xml.getElementsByTagName('trkpt')).map(el => ([
+        parseFloat(el.getAttribute('lat')),
+        parseFloat(el.getAttribute('lon'))
+      ]));
+    }
+
+    document.getElementById('loadBtn').addEventListener('click', () => {
+      const file = document.getElementById('gpxfile').files[0];
+      if (!file) return alert('Choose a GPX file first.');
+      const reader = new FileReader();
+      reader.onload = () => {
+        const pts = parseGPX(reader.result);
+        if (!pts.length) { alert('No track points found'); return; }
+        const poly = L.polyline(pts, { weight: 3 }).addTo(map);
+        map.fitBounds(poly.getBounds());
+      };
+      reader.readAsText(file);
+    });
+
+    async function loadPreloadedGPX(url) {
+      try {
+        const text = await fetch(url).then(r => r.text());
+        const pts = parseGPX(text);
+        if (!pts.length) return alert('No track points found');
+        const poly = L.polyline(pts, { weight: 3 }).addTo(map);
+        map.fitBounds(poly.getBounds());
+      } catch (e) {
+        alert('Could not load GPX: ' + e);
+      }
+    }
+
+    // --- GPS / Geolocation ---
+    let watchId = null;
+    let youMarker = null;
+    let accuracyCircle = null;
+    let firstFix = true;
+
+    function updatePosition(pos) {
+      const { latitude, longitude, accuracy, heading } = pos.coords;
+      const latlng = [latitude, longitude];
+
+      // Marker for you
+      if (!youMarker) {
+        youMarker = L.marker(latlng);
+        youMarker.addTo(map);
+      } else {
+        youMarker.setLatLng(latlng);
+      }
+
+      // Accuracy circle
+      if (!accuracyCircle) {
+        accuracyCircle = L.circle(latlng, {
+          radius: accuracy || 10,
+          weight: 1,
+          opacity: 0.7,
+          fillOpacity: 0.1
+        }).addTo(map);
+      } else {
+        accuracyCircle.setLatLng(latlng);
+        accuracyCircle.setRadius(accuracy || 10);
+      }
+
+      // Center on first fix
+      if (firstFix) {
+        map.setView(latlng, Math.max(map.getZoom(), 14));
+        firstFix = false;
+      }
+
+      // (Optional) use heading to rotate a custom marker later
+      // if (typeof heading === 'number' && !isNaN(heading)) { ... }
+    }
+
+    function geoError(err) {
+      alert('Location error: ' + (err.message || err));
+    }
+
+    // One-shot locate
+    document.getElementById('locateBtn').addEventListener('click', () => {
+      if (!navigator.geolocation) return alert('Geolocation not supported on this device/browser.');
+      navigator.geolocation.getCurrentPosition(updatePosition, geoError, {
+        enableHighAccuracy: true, timeout: 20000, maximumAge: 10000
+      });
+    });
+
+    // Start/stop continuous tracking
+    const trackBtn = document.getElementById('trackBtn');
+    trackBtn.addEventListener('click', () => {
+      if (!navigator.geolocation) return alert('Geolocation not supported on this device/browser.');
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+        trackBtn.textContent = '▶️ Start tracking';
+        return;
+      }
+      firstFix = true;
+      watchId = navigator.geolocation.watchPosition(updatePosition, geoError, {
+        enableHighAccuracy: true, timeout: 20000, maximumAge: 5000
+      });
+      trackBtn.textContent = '⏹ Stop tracking';
+    });
   </script>
 </body>
 </html>
