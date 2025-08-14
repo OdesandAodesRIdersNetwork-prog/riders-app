@@ -1,7 +1,7 @@
-
 <!doctype html>
 <html lang="en">
 <head>
+  <title>Odes & Aodes Riders Network — Search</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="manifest" href="/manifest.v3.webmanifest">
@@ -10,11 +10,13 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16-v3.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/favicon-180-v3.png">
 
-  <title>Odes &amp; Aodes Riders Network — Search</title>
 </head>
 <body>
   <header class="header">
-    <h1>Odes &amp; Aodes Riders Network</h1>
+    <div class="brand-hero">
+      <img src="/assets/icons/favicon-180-v3.png" alt="Brand">
+      <h1>Odes & Aodes Riders Network</h1>
+    </div>
     <nav class="nav">
       <a class="active" href="index.html">Search</a>
       <a href="map.html">Map</a>
@@ -23,14 +25,13 @@
   <div class="container">
     <div class="card">
       <input id="q" class="input" placeholder="Search ODES/AODES tech tips (try: regulator, cooling, CVT)" oninput="RN.renderSearch()"/>
+      <div class="small" style="margin-top:8px">Install on your phone for offline use — your tech tips will be ready on the trail.</div>
     </div>
     <div id="results"></div>
   </div>
-  <div class="footer small">Add to Home Screen to install. Works offline for saved pages.</div>
+  <div class="footer small">© Odes & Aodes Riders Network</div>
   <script src="/assets/js/lunr.min.js"></script>
   <script src="/assets/js/app.js"></script>
   <script>RN.renderSearch()</script>
-
-<!-- build v3 -->
 </body>
 </html>

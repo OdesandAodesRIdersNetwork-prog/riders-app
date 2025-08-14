@@ -16,3 +16,5 @@
 .footer{padding:32px;color:#64748b;text-align:center}
 .hr{height:1px;background:#1f2937;margin:16px 0}
 .small{font-size:12px;color:#94a3b8}
+.brand-hero{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+.brand-hero img{width:56px;height:56px;border-radius:12px;border:1px solid #1f2937}

@@ -1,12 +1,9 @@
 # Regulator Grounding Fix (ODES 800)
 
-**Why:** Heat + paint on the frame can cause poor grounding and low charging voltage.
+**Why:** Heat + painted frame can cause poor grounding and low charging voltage.
 
-**Quick steps**
-- Remove regulator and scrape paint to bare metal.
-- Install a star washer between frame and regulator.
-- Add a ground jumper from regulator case to battery negative.
-- Test voltage at idle and 4000 rpm; aim for 13.8–14.5V warm.
-
-**Notes**
-If the stator plug is heat-damaged, relocate the rectifier/regulator to a cooler spot and inspect wire gauge on the harness side.
+**Steps**
+- Scrape paint to bare metal at the regulator mount.
+- Add star washer; torque fasteners.
+- Add ground jumper from case to battery negative.
+- Verify 13.8–14.5V at 4k RPM (warm).
